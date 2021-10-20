@@ -1,6 +1,7 @@
 
 import discord
 from discord import Client
+import os
 intents = discord.Intents.default()
 intents.members=True
 client= Client(intents=intents)
@@ -32,4 +33,4 @@ async def on_member_join(member):
 
 
 
-client.run('OTAwMDAyOTE0OTQzMjM4MTc0.YW6_CA.OppmM5isjqE1Zg-OikFpw7-HOR4')
+client.run(os.environ.get('TOKEN_SECRET'))
