@@ -1,1 +1,3 @@
-venv/
+venv
+.env
+environ_var.py
