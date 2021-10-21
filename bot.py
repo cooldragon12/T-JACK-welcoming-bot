@@ -1,7 +1,7 @@
 
 import discord
 from discord.message import Message
-from discord.util import get
+from discord.utils import get
 from discord import Client
 import os
 import environ_var
