@@ -1,6 +1,6 @@
 
 import discord
-from discord.message import Message
+from discord.ext import commands
 from discord.utils import get
 from discord import Client
 import os
@@ -8,66 +8,99 @@ import environ_var
 intents = discord.Intents.default()
 intents.members=True
 intents.reactions=True
-client= Client(intents=intents)
 
+client= Client(intents=intents)
+bot = commands.Bot(command_prefix=">>")
 
 @client.event
 async def on_ready():
     print("We are Ready!!!")
     channel = client.get_channel(900665979812589588)
-    emoji_selection = [":school_satchel:", ":1251squidwardawake:", ":mechanical_arm:", ":1000hahaa:", ":5724duck:", ":8793beluga:"]
+    emoji_selection = [899104958845157416, 899104959201677373, 899104960443220009, 899104959260422145]
 
-    message = await client.send_message(channel, '''
+    # emoji_selection = ["school_satchel", "1251squidwardawake", "mechanical_arm", "1000hahaa", "5724duck", "8793beluga"]
+    emoji_id = []
+    for emoji_name in emoji_selection:
+        emoji = client.get_emoji(emoji_name)
+        emoji_id.append(emoji)
+    message = await channel.send(f'''
 Welcome to our server T-AJACK
 
 To get your role click the following emojis:
 
     🎒 = Classmates - if you're are classmates 
 
-    :1251squidwardawake: = Iyah's Katoto - if you're friend of Iyah
+    {emoji_id[0]} = Iyah's Katoto - if you're friend of Iyah
 
     🦾 = Karl's Katoto - if you're friend of Karl
 
-    :1000hahaa: = Shawn's Katoto - if you're friend of Shawn
+    {emoji_id[1]} = Shawn's Katoto - if you're friend of Shawn
 
-    :5724duck: = Johndel's Katoto - if you're friend of Johndel
+    {emoji_id[2]} = Johndel's Katoto - if you're friend of Johndel
 
-    :8793beluga: = Cassandra's Katoto  - if you're friend of Cassandra
+    {emoji_id[3]} = Cassandra's Katoto  - if you're friend of Cassandra
 
 Enjoy the server 
     ''')
-    await client.add_reaction(message, emoji=emoji_selection[0])
-    await client.add_reaction(message, emoji=emoji_selection[1])
-    await client.add_reaction(message, emoji=emoji_selection[2])
-    await client.add_reaction(message, emoji=emoji_selection[3])
-    await client.add_reaction(message, emoji=emoji_selection[4])
-    await client.add_reaction(message, emoji=emoji_selection[5])
+ 
+    await message.add_reaction( emoji=str('🎒'))
+    await message.add_reaction( emoji=emoji_id[0])
+    await message.add_reaction( emoji=str('🦾'))
+    await message.add_reaction( emoji=emoji_id[1])
+    await message.add_reaction( emoji=emoji_id[2])
+    await message.add_reaction( emoji=emoji_id[3])
+# For The Role Selection
+emoji_selection1 = [":school_satchel:", ":1251squidwardawake:", ":mechanical_arm:", ":1000hahaa:", ":5724duck:", ":8793beluga:"]
+emoji_selection = [899104958845157416, 899104959201677373, 899104960443220009, 899104959260422145]
+roles = ["IYAH's Katoto", "SHAWN's Katoto","JOHNDEL's Katoto", "CASSANDRA's Katoto","Classmates", "KARL's Katoto"]
+channel_id = 900665979812589588
+selected = []
+@client.event
+async def on_reaction_remove(reaction,user):
+        
+        # channel = client.get_channel(channel)
+        emoji_id = []
+        for emoji_name in emoji_selection:
+            emoji = client.get_emoji(emoji_name)
+            emoji_id.append(emoji)
+        emoji_id.append(str('🎒')) # 4
+        emoji_id.append(str('🦾')) # 5
+        
+        if reaction.message.channel.id ==channel_id:
+            selected.remove(user.id)
+            for i in range(len(emoji_selection1)):
+                    emoji = reaction.emoji
+                    if emoji == emoji_id[i]:
+                        role = get(user.guild.roles, name=roles[i])
+            await user.remove_roles(role)    
+
 
 @client.event
 async def on_reaction_add(reaction,user):
-        reaction = await client.wait_for_reaction(emoji="🏃", message=message)
-        emoji_selection = [":school_satchel:", ":1251squidwardawake:", ":mechanical_arm:", ":1000hahaa:", ":5724duck:", ":8793beluga:"]
-        channel = client.get_channel(900665979812589588)
-        if reaction.message.channel.id != channel:
-            return
-        emoji = reaction.emoji
-        if emoji == emoji_selection[0]:
-            role = get(user.server.roles, name="Classmates")
+    if user.id != 900002914943238174:
+        # channel = client.get_channel(channel)
+        emoji_id = []
+        for emoji_name in emoji_selection:
+            emoji = client.get_emoji(emoji_name)
+            emoji_id.append(emoji)
+        emoji_id.append(str('🎒')) # 4
+        emoji_id.append(str('🦾')) # 5
+        
+       
             
-        elif emoji == emoji_selection[1]:
-            role = get(user.server.roles, name="IYAH's Katoto")
+        
+        if reaction.message.channel.id ==channel_id:
             
-        elif emoji == emoji_selection[2]:
-            role = get(user.server.roles, name="KARL's Katoto")
-                
-        elif emoji == emoji_selection[3]:
-            role = get(user.server.roles, name="SHAWN's Katoto")
-                
-        elif emoji == emoji_selection[4]:
-            role = get(user.server.roles, name="JOHNDEL's Katoto")
-        elif emoji == emoji_selection[5]:
-            role = get(user.server.roles, name="CASSANDRA's Katoto")
-        await client.add_roles(reaction.message.author, role)    
+            if user.id not in selected:
+                print("reacted")
+                selected.append(user.id)
+                print(selected)
+                for i in range(len(emoji_selection1)):
+                    emoji = reaction.emoji
+                    if emoji == emoji_id[i]:
+                        role = get(user.guild.roles, name=roles[i])
+                        
+                await user.add_roles(role, reason=None)    
 @client.event
 async def on_member_join(member):
     guild = member.guild
@@ -76,9 +109,10 @@ async def on_member_join(member):
     members = len(list(member.guild.members))
 
     print(f"{user} has join")
-    msg = f'''Hello {mention}! 
-    Welcome to {guild} and thank you for joining enjoy
-    Current population of this guild is {members}.
+    msg = f'''
+Hello {mention}! 
+Welcome to {guild} and thank you for joining enjoy
+Current population of this guild is {members}.
     '''
     channel = client.get_channel(897640623669116968)
     
